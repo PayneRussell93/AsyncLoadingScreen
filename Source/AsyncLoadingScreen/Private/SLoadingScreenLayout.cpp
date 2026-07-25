@@ -11,6 +11,7 @@
 #include "SHorizontalLoadingWidget.h"
 #include "SVerticalLoadingWidget.h"
 #include "SLoadingCompleteText.h"
+#include "SPSOPrecacheProgressWidget.h"
 #include "Engine/UserInterfaceSettings.h"
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
@@ -73,6 +74,20 @@ void SLoadingScreenLayout::AddLoadingCompleteTextSlot(const TSharedRef<SOverlay>
 			.Padding(Settings.LoadingCompleteTextSettings.Padding)
 			[
 				SNew(SLoadingCompleteText, Settings.LoadingCompleteTextSettings)
+			];
+	}
+}
+
+void SLoadingScreenLayout::AddPSOPrecacheProgressSlot(const TSharedRef<SOverlay>& Root, const FALoadingScreenSettings& Settings)
+{
+	if (Settings.PSOPrecacheProgressWidget.bShowProgressWidget)
+	{
+		Root->AddSlot()
+			.VAlign(Settings.PSOPrecacheProgressWidget.Alignment.VerticalAlignment)
+			.HAlign(Settings.PSOPrecacheProgressWidget.Alignment.HorizontalAlignment)
+			.Padding(Settings.PSOPrecacheProgressWidget.Padding)
+			[
+				SNew(SPSOPrecacheProgressWidget, Settings.PSOPrecacheProgressWidget)
 			];
 	}
 }

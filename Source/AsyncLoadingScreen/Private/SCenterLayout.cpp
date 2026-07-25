@@ -69,6 +69,9 @@ void SCenterLayout::Construct(const FArguments& InArgs, const FALoadingScreenSet
 	// Construct loading complete text if enable
 	AddLoadingCompleteTextSlot(Root, Settings);
 
+	// Construct PSO precache progress widget if enable
+	AddPSOPrecacheProgressSlot(Root, Settings);
+
 	// Add root to this widget
 	ChildSlot
 	[

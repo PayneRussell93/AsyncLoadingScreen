@@ -91,6 +91,9 @@ void SLetterboxLayout::Construct(const FArguments& InArgs, const FALoadingScreen
 	// Construct loading complete text if enable
 	AddLoadingCompleteTextSlot(Root, Settings);
 
+	// Construct PSO precache progress widget if enable
+	AddPSOPrecacheProgressSlot(Root, Settings);
+
 	// Add Root to this widget
 	ChildSlot
 		[

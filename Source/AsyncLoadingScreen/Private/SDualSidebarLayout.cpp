@@ -89,6 +89,9 @@ void SDualSidebarLayout::Construct(const FArguments& InArgs, const FALoadingScre
 	// Construct loading complete text if enable
 	AddLoadingCompleteTextSlot(Root, Settings);
 
+	// Construct PSO precache progress widget if enable
+	AddPSOPrecacheProgressSlot(Root, Settings);
+
 	// Add root to this widget
 	ChildSlot
 	[

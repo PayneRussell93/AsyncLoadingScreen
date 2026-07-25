@@ -27,5 +27,14 @@ public class AsyncLoadingScreen : ModuleRules
 				"DeveloperSettings"
 			}
 			);
+
+		// PSO precache APIs (FShaderPipelineCache/PipelineStateCache) are only used in private implementation files
+		PrivateDependencyModuleNames.AddRange(
+			new string[]
+			{
+				"RenderCore",
+				"RHI"
+			}
+			);
 	}
 }

@@ -77,6 +77,13 @@ MoviePlayer is registered to PreLoadMap and PostLoadMapWithWorld delegates so it
 
 # Changelog
 
+### Version 1.7.0 (19/07/2026)
+- New **Wait For PSO Precaching To Complete** option (per loading screen): the loading screen stays up until all outstanding PSO precache compilations (bundled PSO cache + runtime PSO precaching) are finished, as recommended by Epic's PSO Precaching documentation, so players don't see visual popping or hitches right after the loading screen closes
+- New **PSO Precache Max Wait Time** safety timeout (0 = unlimited); a value > 0 is recommended, especially when the project ships a bundled PSO cache
+- New **Boost PSO Precache Priority** option (default on): boosts outstanding PSO precache compilations to highest priority while the loading screen is displayed, restored when it closes
+- New **PSO Precache Progress Widget** with a fully styleable progress bar (background/fill brushes, size, alignment, padding) and an optional text supporting `{Percent}` and `{Remaining}` format arguments (e.g. `Compiling Shaders... {Percent}%`); it only appears while PSO precache compilations are outstanding and hides itself when they are done
+- Notes: the wait takes over **Wait For Manual Stop** (forced to true) and the plugin stops the loading screen automatically once PSO precaching finishes or times out (honoring **Minimum Loading Screen Display Time**), so no `StopLoadingScreen` call is needed; with **Minimum Loading Screen Display Time** = -1 players can still press any key to skip the wait once level loading is done; the options have no effect where PSO precaching is disabled (editor, DirectX 11, `r.PSOPrecaching=0`)
+
 ### Version 1.6.2 (18/07/2026)
 - The **BackgroundColor** now renders even when the Background's **Images** array is empty; previously the background widget rendered nothing at all without images (set the color's alpha to 0 for the old transparent behavior)
 - The loading screen now scales up on high-resolution displays (1440p/4K) following the project's DPI curve; previously the scale was capped at 1.0
