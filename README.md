@@ -51,9 +51,9 @@
 
 Loading screens aren't trivial in general, especially in Unreal Engine. And this makes a lot of UE newcomers are confused at first. Due to User Widget is destroyed at level transition, and level loading runs on the main thread, it blocks any other game activities until it's completed. That's why you need to use Level Streaming for loading screens otherwise your widget blueprint will not work. You have to manually control which object is loaded/unloaded, you can't use different Game Mode, Player Controller for each level, and sometimes there's still occasional freezing.
 
-That said, you may need to change your game logic to fit with Level Streaming mechanic and it requires a lot of works to achieve a simple thing: Add a Loading Screen. To create a custom loading screen without Level Streaming, you have to do it in Unreal C++. However, this is a hard task for artists and designers, even for developers who are not familiar with the Slate framework and engine module code. Async Loading Screen plug-in comes to a savior.
+That said, you may need to change your game logic to fit with the Level Streaming mechanic, and it requires a lot of work to achieve a simple thing: Add a Loading Screen. To create a custom loading screen without Level Streaming, you have to do it in Unreal C++. However, this is a hard task for artists and designers, even for developers who are not familiar with the Slate framework and engine module code. Async Loading Screen plug-in comes to the rescue.
 
-Async Loading Screen allows you to easily configure a Loading Screen System in the project settings, and automatically add a Loading Screen whenever you open a new level. Async Loading Screen also comes with pre-design UI layouts and default icons that make it easy to custom your loading screen in a few minutes (less than 5 minutes I swear).
+Async Loading Screen allows you to easily configure a Loading Screen System in the project settings, and automatically add a Loading Screen whenever you open a new level. Async Loading Screen also comes with pre-designed UI layouts and default icons that make it easy to customize your loading screen in a few minutes (less than 5 minutes, I swear).
 
 # How it works
 
@@ -64,12 +64,12 @@ MoviePlayer is registered to PreLoadMap and PostLoadMapWithWorld delegates so it
 # Features
 
 - Easy to set up, easy to use.
-- Customizable pre-make responsive layouts.
+- Customizable pre-made responsive layouts.
 - Customizable loading icons.
-- Pre-make default loading icons.
-- Supported animating images sequence.
+- Pre-made default loading icons.
+- Supported animating image sequences.
 - Supported on all major platforms.
-- Easily play movies, audio files.
+- Easily play movies and audio files.
 - No need for coding.
 - No temporary maps, no level streaming.
 - Automatically handles all level transitions.
@@ -77,7 +77,7 @@ MoviePlayer is registered to PreLoadMap and PostLoadMapWithWorld delegates so it
 
 # Changelog
 
-### Version 1.7.0 (19/07/2026)
+### Version 1.7.0 (25/07/2026)
 - New **Wait For PSO Precaching To Complete** option (per loading screen): the loading screen stays up until all outstanding PSO precache compilations (bundled PSO cache + runtime PSO precaching) are finished, as recommended by Epic's PSO Precaching documentation, so players don't see visual popping or hitches right after the loading screen closes
 - New **PSO Precache Max Wait Time** safety timeout (0 = unlimited); a value > 0 is recommended, especially when the project ships a bundled PSO cache
 - New **Boost PSO Precache Priority** option (default on): boosts outstanding PSO precache compilations to highest priority while the loading screen is displayed, restored when it closes
@@ -272,6 +272,17 @@ This is the way Async Loading Screen widgets are arranged on the screen. In vers
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Tutorial
+## Enable PSO Precaching Progress Widget
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/15c96587-c508-4a42-b185-d0d129379b61" />
+- Set **Wait for PSO Precaching to Complete** to true. Note that **Show Eidget Overlay** must be true too.
+  <img width="991" height="497" alt="pso-setting-01" src="https://github.com/user-attachments/assets/8720edde-3cc6-45e2-bd8f-a0fbff7dc55b" />
+- Example of **PSOPrecach Progress Widget** settings
+<img width="1201" height="455" alt="pso-setting-02" src="https://github.com/user-attachments/assets/f9ce0ca2-4c74-4fa0-96c1-d86b97016254" />
+- TIPS: If you are using movie clips for background and you only want to show the PSO Progress widget only. You can hide other widgets (background, loading icon, text etc..) by set it empty or set alpha color to ~0.0.
+<img width="1392" height="487" alt="tutoria-bg-transparent" src="https://github.com/user-attachments/assets/49398050-a715-45c7-9183-957a8c6fb36b" />
+
+---
+
 In this tutorial, I will use a blank C++ project with UE version 4.25. But you can freely integrate Async Loading Screen plugin into your existing projects without problems. You should install the plugin following [Installation](#installation) steps above.
 
 ## 1) Create Testing Levels and Blueprints
