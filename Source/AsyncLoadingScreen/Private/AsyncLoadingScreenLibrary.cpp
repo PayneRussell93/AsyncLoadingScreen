@@ -8,6 +8,7 @@
 
 
 #include "AsyncLoadingScreenLibrary.h"
+#include "AsyncLoadingScreen.h"
 #include "MoviePlayer.h"
 
 int32 UAsyncLoadingScreenLibrary::DisplayBackgroundIndex = -1;
@@ -38,5 +39,15 @@ void UAsyncLoadingScreenLibrary::SetEnableLoadingScreen(bool bIsEnableLoadingScr
 void UAsyncLoadingScreenLibrary::StopLoadingScreen()
 {
 	GetMoviePlayer()->StopMovie();
+}
+
+void UAsyncLoadingScreenLibrary::PlayStartupLoadingScreenForTesting(float DisplayDurationSeconds)
+{
+	// IsAvailable rather than Get: Get would load the module on demand, and a call arriving after
+	// shutdown has begun would resurrect it just to show a preview into a closing process.
+	if (FAsyncLoadingScreenModule::IsAvailable())
+	{
+		FAsyncLoadingScreenModule::Get().PlayStartupLoadingScreenForTesting(DisplayDurationSeconds);
+	}
 }
 

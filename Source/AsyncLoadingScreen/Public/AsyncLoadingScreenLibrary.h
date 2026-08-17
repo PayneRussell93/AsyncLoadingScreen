@@ -75,6 +75,22 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Async Loading Screen")
 	static void StopLoadingScreen();
 
+	/**
+	 * Replays the Startup Loading Screen so it can be previewed without relaunching the game.
+	 *
+	 * The startup screen normally only ever shows once, during module startup, which makes iterating
+	 * on its layout, tips and timings a relaunch per change. This puts it back on screen using the
+	 * same setup path, with the boot-only settings overridden - see
+	 * FAsyncLoadingScreenModule::PlayStartupLoadingScreenForTesting for exactly which and why.
+	 *
+	 * A preview tool, not a gameplay one: nothing is loading behind it, so it closes on a timer
+	 * rather than on load completion.
+	 *
+	 * @param DisplayDurationSeconds How long to leave the screen up before closing it automatically.
+	 **/
+	UFUNCTION(BlueprintCallable, Category = "Async Loading Screen", meta = (DisplayName = "Play Startup Loading Screen (Testing)", AdvancedDisplay = "DisplayDurationSeconds"))
+	static void PlayStartupLoadingScreenForTesting(float DisplayDurationSeconds = 5.0f);
+
 	static inline int32 GetDisplayBackgroundIndex() { return DisplayBackgroundIndex; }
 	static inline int32 GetDisplayTipTextIndex() { return DisplayTipTextIndex; }
 	static inline int32 GetDisplayMovieIndex() { return DisplayMovieIndex; }

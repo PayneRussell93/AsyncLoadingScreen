@@ -9,6 +9,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Containers/Ticker.h"
 #include "Modules/ModuleManager.h"
 
 struct FALoadingScreenSettings;
@@ -64,6 +65,24 @@ public:
 	 */
 	bool IsStartupLoadingScreen() { return bIsStartupLoadingScreen; }
 
+	/**
+	 * Replays the Startup Loading Screen on demand so it can be iterated on without relaunching.
+	 *
+	 * The startup screen is otherwise only reachable once per process, from StartupModule, which makes
+	 * tuning its layout, tips and timings a relaunch-per-change job. This is the same SetupLoadingScreen
+	 * path StartupModule takes, with the settings that only make sense during a real boot overridden:
+	 * early startup is forced off (it suppresses the widget overlay, which is the whole thing being
+	 * looked at), and the PSO precache wait is forced off (there is no level load here to wait behind,
+	 * so PollPSOPrecaching would either close the screen immediately or hold it for the full timeout).
+	 *
+	 * Because nothing is loading, the movie player has no completion event to close on - so the screen
+	 * is stopped by a timer instead. Exposed to Blueprint via
+	 * UAsyncLoadingScreenLibrary::PlayStartupLoadingScreenForTesting.
+	 *
+	 * @param AutoStopAfterSeconds How long to leave the screen up. Clamped to at least 0.1s.
+	 */
+	ASYNCLOADINGSCREEN_API void PlayStartupLoadingScreenForTesting(float AutoStopAfterSeconds);
+
 private:
 	/**
 	 * Loading screen callback, it won't be called if we've already explicitly setup the loading screen
@@ -109,4 +128,7 @@ private:
 	double MoviePlaybackStartTime = 0.0;
 	double PSOWaitPhaseStartTime = 0.0;
 	FDelegateHandle SamplingInputHandle;
+
+	/** Ticker that closes a PlayStartupLoadingScreenForTesting screen; reset when it fires or is superseded. */
+	FTSTicker::FDelegateHandle TestPlaybackStopHandle;
 };

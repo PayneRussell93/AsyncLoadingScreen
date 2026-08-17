@@ -63,6 +63,14 @@ void FAsyncLoadingScreenModule::ShutdownModule()
 		SamplingInputHandle.Reset();
 	}
 
+	// The stop-ticker's lambda captures this; leaving it registered past unload would fire into
+	// freed memory on the next tick.
+	if (TestPlaybackStopHandle.IsValid())
+	{
+		FTSTicker::GetCoreTicker().RemoveTicker(TestPlaybackStopHandle);
+		TestPlaybackStopHandle.Reset();
+	}
+
 	if (bPSOBoostActive)
 	{
 		PipelineStateCache::PrecachePSOsBoostToHighestPriority(false);
@@ -176,6 +184,75 @@ void FAsyncLoadingScreenModule::SetupLoadingScreen(const FALoadingScreenSettings
 	}
 
 	GetMoviePlayer()->SetupLoadingScreen(LoadingScreen);
+}
+
+void FAsyncLoadingScreenModule::PlayStartupLoadingScreenForTesting(float AutoStopAfterSeconds)
+{
+	if (IsRunningDedicatedServer() || !IsMoviePlayerEnabled())
+	{
+		UE_LOG(LogAsyncLoadingScreen, Warning, TEXT("PlayStartupLoadingScreenForTesting: no movie player available."));
+		return;
+	}
+
+	// A second request while one is already up would stack a stop timer against a screen the first
+	// timer is also going to close. Cancelling the outstanding one first makes repeated presses
+	// behave like "restart the preview" rather than "close it early".
+	if (TestPlaybackStopHandle.IsValid())
+	{
+		FTSTicker::GetCoreTicker().RemoveTicker(TestPlaybackStopHandle);
+		TestPlaybackStopHandle.Reset();
+	}
+
+	if (GetMoviePlayer()->IsMovieCurrentlyPlaying())
+	{
+		GetMoviePlayer()->StopMovie();
+	}
+
+	FALoadingScreenSettings TestSettings = GetDefault<ULoadingScreenSettings>()->StartupLoadingScreen;
+
+	// Early startup forbids UObjects, which SetupLoadingScreen honours by skipping the widget overlay
+	// entirely. During a real boot that is correct; here it would mean previewing a blank screen.
+	TestSettings.bAllowInEarlyStartup = false;
+
+	// Nothing is loading, so there is no precache burst to wait behind and no load completion to
+	// close on. Left enabled, PollPSOPrecaching would take ownership of stopping the screen and
+	// either close it on the first tick or hold it for the whole PSOPrecacheMaxWaitTime.
+	TestSettings.bWaitForPSOPrecachingToComplete = false;
+
+	// The timer below owns the lifetime; bAutoCompleteWhenLoadingCompletes would otherwise close the
+	// screen as soon as the movie player noticed there was no load in flight.
+	TestSettings.bAutoCompleteWhenLoadingCompletes = false;
+	TestSettings.bWaitForManualStop = true;
+	TestSettings.MinimumLoadingScreenDisplayTime = -1.0f;
+
+	// Without this the movie player stalls the game thread while the screen is up, which would stop
+	// the ticker that is supposed to close it.
+	TestSettings.bAllowEngineTick = true;
+
+	SetupLoadingScreen(TestSettings);
+
+	if (!GetMoviePlayer()->PlayMovie())
+	{
+		UE_LOG(LogAsyncLoadingScreen, Warning,
+			TEXT("PlayStartupLoadingScreenForTesting: PlayMovie() refused. The StartupLoadingScreen needs either a movie in MoviePaths or 'Show Widget Overlay' enabled to have anything to display."));
+		return;
+	}
+
+	const float StopDelay = FMath::Max(AutoStopAfterSeconds, 0.1f);
+
+	UE_LOG(LogAsyncLoadingScreen, Log,
+		TEXT("PlayStartupLoadingScreenForTesting: previewing the startup screen for %.1fs."), StopDelay);
+
+	// FTSTicker rather than a world timer: this is triggered from UI that may not have a world worth
+	// depending on, and the movie player is engine-scoped anyway.
+	TestPlaybackStopHandle = FTSTicker::GetCoreTicker().AddTicker(
+		FTickerDelegate::CreateLambda([this](float) -> bool
+		{
+			GetMoviePlayer()->StopMovie();
+			TestPlaybackStopHandle.Reset();
+			return false; // one shot
+		}),
+		StopDelay);
 }
 
 void FAsyncLoadingScreenModule::ShuffleMovies(TArray<FString>& MoviesList)
